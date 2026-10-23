@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Food AI",
+    "slug": "food-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "usesAppleSignIn": true,
+      "bundleIdentifier": "com.yourname.nutrifact"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#9A4B27"
+      },
+      "package": "com.yourname.nutrifact"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Nutrifact to choose a profile photo from your library.",
+          "microphonePermission": false
+        }
+      ],
+      "expo-secure-store",
+      "expo-font",
+      "expo-apple-authentication",
+      "expo-dev-client"
+    ],
+    "scheme": "nutrifact",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ded9817d-0320-479a-9ec8-8c047ca2fa07"
+      }
+    }
+  }
+}

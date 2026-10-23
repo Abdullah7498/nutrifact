@@ -1,0 +1,20 @@
+{
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "environment": "development",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://192.168.1.105:8000",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "134400164535-vq4dgt437hksjcrt1l3sq1hk43f6qati.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "134400164535-31n9ta8f7rbsks15tvf5pv5ce98jfl7g.apps.googleusercontent.com"
+      }
+    },
+    "production": {
+      "environment": "production"
+    }
+  },
+  "cli": {
+    "appVersionSource": "remote"
+  }
+}
