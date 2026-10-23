@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, Share, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, router } from "expo-router";
@@ -7,7 +7,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { ActivityIndicator, Button, HelperText, Text } from "react-native-paper";
 import { useAuth } from "../context/AuthContext";
 import { apiRequest, uploadProfilePhoto } from "../services/auth";
-import { enablePushNotifications } from "../services/pushNotifications";
+import { disablePushNotifications, enablePushNotifications, getSavedPushToken, sendTestPushNotification } from "../services/pushNotifications";
 
 const C = { background: "#F8F3F2", card: "#FFFCFA", ink: "#302820", muted: "#74665E", accent: "#9A4B27", line: "#E9DDD5", green: "#3F8B6B", blue: "#78A7C4" };
 const goalNames = { lose: "Weight loss", maintain: "Maintenance", gain: "Weight gain", muscle: "Muscle building", recomp: "Fat loss + muscle" };
@@ -35,6 +35,11 @@ export default function ProfileScreen() {
   const [pushBusy, setPushBusy] = useState(false);
   const [pushStatus, setPushStatus] = useState("");
   const [pushToken, setPushToken] = useState(null);
+  useEffect(() => {
+    let active = true;
+    getSavedPushToken().then((token) => { if (active) setPushToken(token); }).catch(() => {});
+    return () => { active = false; };
+  }, []);
   useFocusEffect(useCallback(() => {
     let active = true;
     apiRequest("profile", { token: session.accessToken }).then((result) => { if (active) { setProfile(result.profile); setPhotoUrl(result.photoUrl); setError(""); } }).catch((err) => { if (active) setError(err.message); });
@@ -66,11 +71,36 @@ export default function ProfileScreen() {
     setPushBusy(true);
     setPushStatus("");
     try {
-      const token = await enablePushNotifications();
+      const token = await enablePushNotifications(session.accessToken);
       setPushToken(token);
       setPushStatus(token ? "Push notifications enabled" : "Notification permission was not granted");
     } catch (err) {
       setPushStatus(err.message || "Could not enable push notifications.");
+    } finally {
+      setPushBusy(false);
+    }
+  }
+  async function disablePush() {
+    setPushBusy(true);
+    setPushStatus("");
+    try {
+      await disablePushNotifications(session.accessToken);
+      setPushToken(null);
+      setPushStatus("Push notifications disabled");
+    } catch (err) {
+      setPushStatus(err.message || "Could not disable push notifications.");
+    } finally {
+      setPushBusy(false);
+    }
+  }
+  async function testPush() {
+    setPushBusy(true);
+    setPushStatus("");
+    try {
+      const result = await sendTestPushNotification(session.accessToken);
+      setPushStatus(result.sent ? "Test notification sent" : "Firebase could not deliver the test notification");
+    } catch (err) {
+      setPushStatus(err.message || "Could not send a test notification.");
     } finally {
       setPushBusy(false);
     }
@@ -117,7 +147,9 @@ export default function ProfileScreen() {
       <Card>
         <Text style={{ color: C.ink, fontFamily: "Manrope_700Bold", fontSize: 17 }}>Push notifications</Text>
         <Text style={{ color: C.muted, marginTop: 5 }}>Allow Nutrifact to notify you on this device.</Text>
-        <Button mode="contained-tonal" onPress={enablePush} loading={pushBusy} disabled={pushBusy} style={{ marginTop: 14 }}>Enable notifications</Button>
+        <Button mode="contained-tonal" onPress={enablePush} loading={pushBusy} disabled={pushBusy} style={{ marginTop: 14 }}>{pushToken ? "Refresh notification setup" : "Enable notifications"}</Button>
+        {!!pushToken && <Button mode="text" onPress={testPush} disabled={pushBusy}>Send test notification</Button>}
+        {!!pushToken && <Button mode="text" onPress={disablePush} disabled={pushBusy}>Disable notifications</Button>}
         {!!pushStatus && <Text accessibilityLiveRegion="polite" style={{ color: C.muted, marginTop: 10 }}>{pushStatus}</Text>}
         {__DEV__ && !!pushToken && <Button mode="text" onPress={() => Share.share({ message: pushToken })}>Share test FCM token</Button>}
       </Card>

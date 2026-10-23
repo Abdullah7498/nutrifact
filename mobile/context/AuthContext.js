@@ -3,6 +3,7 @@ import { AppState, Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { createSession, hasRefreshToken, isSessionValid, SESSION_KEY } from "../services/session";
 import { apiRequest, authRequest } from "../services/auth";
+import { clearPushPreference } from "../services/pushNotifications";
 
 const AuthContext = createContext(null);
 const storage = {
@@ -114,6 +115,7 @@ export function AuthProvider({ children }) {
       } catch (error) { if (error.status !== 401) throw error; }
     }
     await storage.clear();
+    await clearPushPreference().catch(() => {});
     sessionRef.current = null;
     setStorageError("");
     setSession(null);

@@ -10,8 +10,8 @@
     "format": "prettier --write \"**/*.js\"",
     "start": "babel-node index.js",
     "start:dev": "nodemon",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
-    "test:cov": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
+    "test": "node --require @babel/register --test test/*.test.cjs",
+    "test:cov": "node --experimental-test-coverage --require @babel/register --test test/*.test.cjs",
     "test:e2e": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json"
   },
   "dependencies": {
@@ -27,6 +27,7 @@
     "@nestjs/throttler": "^6.7.1",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
+    "firebase-admin": "^14.5.0",
     "helmet": "^8.3.0",
     "mongoose": "^9.11.3",
     "nestjs-pino": "^5.3.1",

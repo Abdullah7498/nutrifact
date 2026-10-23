@@ -9,6 +9,7 @@ import { TimingInterceptor } from './common/interceptors/timing.interceptor.js';
 import { requestLoggerOptions } from './common/middleware/request-logger.middleware.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { ProfileModule } from './modules/profile/profile.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { DatabaseModule } from './database/databae.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
@@ -34,6 +35,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     DatabaseModule,
     AuthModule,
     ProfileModule,
+    NotificationsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: HttpExceptionFilter },

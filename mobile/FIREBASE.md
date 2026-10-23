@@ -1,6 +1,6 @@
 # Firebase push notifications (mobile)
 
-This app uses React Native Firebase Messaging for Android and iOS. It needs a **development or production build**; Expo Go cannot load the native Firebase modules. The mobile app currently receives FCM notifications and exposes a test token. Sending notifications to users from the Nest backend is a separate server integration.
+This app uses React Native Firebase Messaging for Android and iOS. It needs a **development or production build**; Expo Go cannot load the native Firebase modules. The app registers an FCM token with the authenticated Nest backend after the user enables notifications. The backend sends through Firebase Admin.
 
 ## Firebase Console setup
 
@@ -13,8 +13,8 @@ The downloaded files are ignored by Git. For EAS cloud builds, create **file** e
 
 ## Test receiving a notification
 
-Open the Profile screen in a development build and tap **Enable notifications**. Grant the OS permission. In development builds, **Share test FCM token** lets you copy the device token. Use Firebase Console → Messaging to send a test notification to that token. A notification sent with a `notification` title and body is displayed by the operating system when the app is in the background; while the app is open, the app shows an alert.
+Configure the backend Firebase credentials as described in [`../backend/NOTIFICATIONS.md`](../backend/NOTIFICATIONS.md). Open the Profile screen in a development build and tap **Enable notifications**. Grant the OS permission, then tap **Send test notification**. In development builds, **Share test FCM token** also lets you copy the device token for a Firebase Console test. A notification sent with a `notification` title and body is displayed by the operating system when the app is in the background; while the app is open, the app shows an alert.
 
-The FCM token can rotate. The app listens for changes while running, but there is no backend token registration yet. For production sends, add an authenticated backend endpoint to store tokens per device, update them on rotation, and remove them on sign-out. Keep Firebase Admin credentials only on the backend.
+The app stores the token in SecureStore after the backend accepts it, syncs it again after sign-in or session refresh, and updates the backend when FCM rotates the token. **Disable notifications** unregisters the token. Signing out revokes the session and removes its registered devices on the backend. Keep Firebase Admin credentials only on the backend.
 
 References: [React Native Firebase Expo setup](https://rnfirebase.io/), [Messaging setup](https://rnfirebase.io/messaging/usage), [iOS APNs setup](https://rnfirebase.io/messaging/usage/ios-setup), [EAS file environment variables](https://docs.expo.dev/eas/environment-variables/).

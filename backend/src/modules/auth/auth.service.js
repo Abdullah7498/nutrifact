@@ -2,6 +2,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { createHash, randomBytes } from 'node:crypto';
@@ -26,10 +27,13 @@ export class AuthService {
     userModel,
     sessionModel,
     jwtService,
+    pushDeviceModel,
   ) {
     this.userModel = userModel;
     this.sessionModel = sessionModel;
     this.jwtService = jwtService;
+    this.pushDeviceModel = pushDeviceModel;
+    this.logger = new Logger(AuthService.name);
   }
 
   async register(body) {
@@ -182,6 +186,9 @@ export class AuthService {
     if (result.modifiedCount !== 1) {
       throw new UnauthorizedException('Session not found');
     }
+    await this.pushDeviceModel.deleteMany({ sessionId: user.sid }).catch((error) => {
+      this.logger.error('Could not remove push devices for revoked session', error?.stack || String(error));
+    });
   }
 
   signAccessToken(user, sessionId) {
@@ -196,3 +203,4 @@ export class AuthService {
 Inject(getModelToken('User'))(AuthService, undefined, 0);
 Inject(getModelToken('Session'))(AuthService, undefined, 1);
 Inject(JwtService)(AuthService, undefined, 2);
+Inject(getModelToken('PushDevice'))(AuthService, undefined, 3);

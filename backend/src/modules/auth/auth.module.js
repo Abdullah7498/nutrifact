@@ -8,12 +8,14 @@ import { AuthService } from './auth.service.js';
 import { UserSchema } from '../../models/user.model.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { SessionSchema } from '../../models/session.model.js';
+import { PushDeviceSchema } from '../../models/push-device.model.js';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'User', schema: UserSchema },
       { name: 'Session', schema: SessionSchema },
+      { name: 'PushDevice', schema: PushDeviceSchema },
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

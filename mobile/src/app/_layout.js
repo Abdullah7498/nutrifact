@@ -15,7 +15,7 @@ import {
   Text,
 } from "react-native-paper";
 import { AuthProvider, useAuth } from "../../context/AuthContext";
-import { listenForPushNotifications } from "../../services/pushNotifications";
+import { listenForPushNotifications, syncPushNotifications } from "../../services/pushNotifications";
 import "../../global.css";
 
 const theme = {
@@ -60,10 +60,14 @@ function RootNavigator() {
 }
 
 function PushNotificationObserver() {
+  const { session } = useAuth();
+  const accessToken = session?.accessToken;
   useEffect(() => {
+    if (!accessToken) return;
     let stopped = false;
     let unsubscribe;
-    listenForPushNotifications().then((stop) => {
+    syncPushNotifications(accessToken).catch(() => {});
+    listenForPushNotifications(accessToken).then((stop) => {
       if (stopped) stop();
       else unsubscribe = stop;
     }).catch(() => {});
@@ -71,7 +75,7 @@ function PushNotificationObserver() {
       stopped = true;
       unsubscribe?.();
     };
-  }, []);
+  }, [accessToken]);
   return null;
 }
 
