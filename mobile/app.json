@@ -3,6 +3,7 @@
     "name": "Food AI",
     "slug": "food-ai",
     "version": "1.0.0",
+    "icon": "./assets/nutrifact-app-icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "ios": {
@@ -12,6 +13,7 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/nutrifact-android-foreground.png",
         "backgroundColor": "#9A4B27"
       },
       "package": "com.yourname.nutrifact"
