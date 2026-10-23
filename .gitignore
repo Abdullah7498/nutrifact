@@ -1,0 +1,22 @@
+# Local repository backup
+.mobile-git-backup/
+
+# Dependencies and generated files
+**/node_modules/
+**/.expo/
+**/dist/
+**/build/
+**/coverage/
+**/logs/
+
+# Local credentials
+**/.env
+**/.env.*.local
+**/google-services.json
+**/GoogleService-Info.plist
+**/*service-account*.json
+**/*.pem
+**/*.p8
+**/*.p12
+**/*.key
+**/*.jks
