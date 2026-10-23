@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View } from "react-native";
 import { Stack } from "expo-router";
 import { useFonts } from "expo-font";
@@ -15,6 +15,7 @@ import {
   Text,
 } from "react-native-paper";
 import { AuthProvider, useAuth } from "../../context/AuthContext";
+import { listenForPushNotifications } from "../../services/pushNotifications";
 import "../../global.css";
 
 const theme = {
@@ -58,6 +59,22 @@ function RootNavigator() {
   );
 }
 
+function PushNotificationObserver() {
+  useEffect(() => {
+    let stopped = false;
+    let unsubscribe;
+    listenForPushNotifications().then((stop) => {
+      if (stopped) stop();
+      else unsubscribe = stop;
+    }).catch(() => {});
+    return () => {
+      stopped = true;
+      unsubscribe?.();
+    };
+  }, []);
+  return null;
+}
+
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     Manrope_400Regular,
@@ -83,6 +100,7 @@ export default function RootLayout() {
   return (
     <PaperProvider theme={theme}>
       <AuthProvider>
+        <PushNotificationObserver />
         <RootNavigator />
       </AuthProvider>
     </PaperProvider>

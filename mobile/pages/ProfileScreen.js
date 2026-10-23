@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Image, Pressable, ScrollView, View } from "react-native";
+import { Image, Pressable, ScrollView, Share, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -7,6 +7,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { ActivityIndicator, Button, HelperText, Text } from "react-native-paper";
 import { useAuth } from "../context/AuthContext";
 import { apiRequest, uploadProfilePhoto } from "../services/auth";
+import { enablePushNotifications } from "../services/pushNotifications";
 
 const C = { background: "#F8F3F2", card: "#FFFCFA", ink: "#302820", muted: "#74665E", accent: "#9A4B27", line: "#E9DDD5", green: "#3F8B6B", blue: "#78A7C4" };
 const goalNames = { lose: "Weight loss", maintain: "Maintenance", gain: "Weight gain", muscle: "Muscle building", recomp: "Fat loss + muscle" };
@@ -31,6 +32,9 @@ export default function ProfileScreen() {
   const [photoStatus, setPhotoStatus] = useState("");
   const [photoError, setPhotoError] = useState("");
   const [error, setError] = useState("");
+  const [pushBusy, setPushBusy] = useState(false);
+  const [pushStatus, setPushStatus] = useState("");
+  const [pushToken, setPushToken] = useState(null);
   useFocusEffect(useCallback(() => {
     let active = true;
     apiRequest("profile", { token: session.accessToken }).then((result) => { if (active) { setProfile(result.profile); setPhotoUrl(result.photoUrl); setError(""); } }).catch((err) => { if (active) setError(err.message); });
@@ -57,6 +61,19 @@ export default function ProfileScreen() {
     try { await signOut(); }
     catch (err) { setError(err.message || "Could not sign out. Please try again."); }
     finally { setBusy(false); }
+  }
+  async function enablePush() {
+    setPushBusy(true);
+    setPushStatus("");
+    try {
+      const token = await enablePushNotifications();
+      setPushToken(token);
+      setPushStatus(token ? "Push notifications enabled" : "Notification permission was not granted");
+    } catch (err) {
+      setPushStatus(err.message || "Could not enable push notifications.");
+    } finally {
+      setPushBusy(false);
+    }
   }
   const unitWeight = profile?.units === "imperial" ? "lb" : "kg";
   const displayWeight = (kg) => kg == null ? "—" : `${profile?.units === "imperial" ? Math.round(kg * 2.20462 * 10) / 10 : kg} ${unitWeight}`;
@@ -96,6 +113,13 @@ export default function ProfileScreen() {
         <SectionRow icon="card-account-details-outline" title="Personal and body data" detail="Birthday, height, weight and units" onPress={edit} />
         <SectionRow icon="target" title="Goal and activity" detail={`${goalNames[profile?.goal] || "Choose a goal"} · ${profile?.activity?.replace("_", " ") || "Activity"}`} onPress={edit} />
         <SectionRow icon="food-apple-outline" title="Dietary preferences" detail={prefText} onPress={edit} />
+      </Card>
+      <Card>
+        <Text style={{ color: C.ink, fontFamily: "Manrope_700Bold", fontSize: 17 }}>Push notifications</Text>
+        <Text style={{ color: C.muted, marginTop: 5 }}>Allow Nutrifact to notify you on this device.</Text>
+        <Button mode="contained-tonal" onPress={enablePush} loading={pushBusy} disabled={pushBusy} style={{ marginTop: 14 }}>Enable notifications</Button>
+        {!!pushStatus && <Text accessibilityLiveRegion="polite" style={{ color: C.muted, marginTop: 10 }}>{pushStatus}</Text>}
+        {__DEV__ && !!pushToken && <Button mode="text" onPress={() => Share.share({ message: pushToken })}>Share test FCM token</Button>}
       </Card>
       {!!profile?.guidance?.length && <Card><Text style={{ color: C.ink, fontFamily: "Manrope_700Bold", fontSize: 17, marginBottom: 8 }}>Food guidance</Text>{profile.guidance.map((item) => <Text key={item} style={{ color: C.muted, lineHeight: 21, marginTop: 8 }}>• {item}</Text>)}</Card>}
       {!!error && <HelperText type="error">{error}</HelperText>}
